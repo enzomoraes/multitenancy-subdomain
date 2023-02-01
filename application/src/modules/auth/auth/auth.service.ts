@@ -1,24 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private http: HttpService) {}
+  constructor(
+    private http: HttpService,
+    private configService: ConfigService,
+  ) {}
 
-  async login(username: string, password: string) {
+  async login(
+    username: string,
+    password: string,
+    tenant: string,
+  ): Promise<{ access_token: string }> {
     const { data } = await firstValueFrom(
       this.http.post(
-        `http://${process.env.KEYCLOAK_HOST}/auth/realms/fullcycle/protocol/openid-connect/token`,
+        `http://${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/auth/realms/${tenant}/protocol/openid-connect/token`,
         new URLSearchParams({
-          client_id: 'wrapper',
-          client_secret: '57441e32-b353-40a5-81e3-75cda25e6b5e',
+          client_id: this.configService.get('KEYCLOAK_CLIENT_ID'),
+          client_secret: this.configService.get('KEYCLOAK_CLIENT_SECRET'),
           grant_type: 'password',
           username,
           password,
         }),
       ),
-    );
+    ).catch(() => {
+      return { data: { message: 'invalid credentials' } };
+    });
     return data;
   }
 }
