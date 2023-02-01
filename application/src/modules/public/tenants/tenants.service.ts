@@ -26,6 +26,7 @@ export class TenantsService {
     );
 
     const connection = await getTenantConnection(`${tenant.subdomain}`);
+    console.log('subdomain connection name', tenant.subdomain);
     await connection.runMigrations();
     await connection.close();
 

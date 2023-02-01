@@ -1,4 +1,4 @@
-import { AbstractEntity } from 'src/abstract.entity';
+import { AbstractEntity } from '../../../../abstract.entity';
 import { Column, Entity } from 'typeorm';
 
 @Entity()

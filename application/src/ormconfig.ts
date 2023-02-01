@@ -14,7 +14,6 @@ export const ormconfig = {
   password: configService.get('POSTGRES_PASSWORD'),
   database: configService.get('POSTGRES_DB'),
   logging: true,
-  autoLoadEntities: true,
   entities: [join(__dirname, './modules/public/**/*.entity{.ts,.js}')],
   migrations: [join(__dirname, '../migrations/public/*{.ts,.js}')],
   name: 'default'
