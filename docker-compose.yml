@@ -32,4 +32,4 @@ services:
     ports:
       - '35436:5432'
     volumes:
-      - ../keycloak/.docker/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      - ./docker/volumes/keycloak-pgsql:/var/lib/postgresql/data
