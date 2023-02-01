@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - '5432:5432'
+    restart: always
+    volumes:
+      - ./docker/volumes/pg-data:/var/lib/postgresql/data
+    env_file:
+      - ./.env.pgsql
+
+  keycloak:
+    container_name: keycloak_cont
+    image: jboss/keycloak:latest
+    depends_on:
+      - keycloak-pgsql
+    env_file:
+      - ./.env.keycloak
+    ports:
+      - '28080:8080'
+    restart: unless-stopped
+
+  keycloak-pgsql:
+    container_name: keycloak_pgsql
+    image: postgres
+    restart: unless-stopped
+    env_file:
+      - ./.env.pgsql-keycloak
+    ports:
+      - '35436:5432'
+    volumes:
+      - ../keycloak/.docker/dump.sql:/docker-entrypoint-initdb.d/dump.sql

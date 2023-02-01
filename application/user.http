@@ -1,0 +1,13 @@
+POST http://localhost:3000/tenants HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzdWJkb21haW4iOiJjZXJ0aSJ9.fAcRmVzlSETqdQgKmb-y1QQxJiM8NXGFn0Mgx4tR9dw
+
+{"subdomain": "certi"}
+
+###
+
+POST http://localhost:3000/users HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJzdWJkb21haW4iOiJjZXJ0aSJ9.fAcRmVzlSETqdQgKmb-y1QQxJiM8NXGFn0Mgx4tR9dw
+
+{"name": "Enzo"}
