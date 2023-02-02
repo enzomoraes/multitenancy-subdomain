@@ -4,6 +4,8 @@
 /application/dist
 /application/node_modules
 
+/application/.env
+
 # Logs
 logs
 *.log
