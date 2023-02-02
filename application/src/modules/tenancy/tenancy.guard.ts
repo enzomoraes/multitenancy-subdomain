@@ -4,14 +4,14 @@ import { TenancyService } from './tenancy.service';
 
 @Injectable()
 export class TenancyGuard implements CanActivate {
-  constructor(private tenantService: TenancyService) {}
+  constructor(private tenancyService: TenancyService) {}
 
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const subdomain = request.user.subdomain;
-    this.tenantService.subdomain = subdomain;
+    this.tenancyService.subdomain = subdomain;
 
     return true;
   }

@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CONNECTION } from 'src/modules/tenancy/tenancy.symbols';
-import { Connection, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { TENANT_DATASOURCE } from '../../../modules/tenancy/tenancy.symbols';
+import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
+import { TenancyService } from '../../tenancy/tenancy.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -10,13 +11,25 @@ import { User } from './entities/user.entity';
 export class UserService {
   private readonly usersRepository: Repository<User>;
 
-  constructor(@Inject(CONNECTION) connection: Connection) {
-    this.usersRepository = connection.getRepository(User);
+  constructor(
+    @Inject(TENANT_DATASOURCE) dataSource: DataSource,
+    private keycloakFacade: KeycloakFacadeService,
+    private tenancyService: TenancyService,
+  ) {
+    this.usersRepository = dataSource.getRepository(User);
   }
 
-  create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto) {
+    await this.keycloakFacade.createUser(
+      createUserDto,
+      this.tenancyService.subdomain,
+    );
+
     const user = new User();
-    user.name = createUserDto.name;
+    user.email = createUserDto.email;
+    user.firstName = createUserDto.firstName;
+    user.lastName = createUserDto.lastName;
+    user.username = createUserDto.username;
 
     return this.usersRepository.save(user);
   }

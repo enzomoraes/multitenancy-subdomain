@@ -1,33 +1,41 @@
 import { Global, Module, Scope } from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
 import { Request as ExpressRequest } from 'express';
-import { TenancyService } from './tenancy.service';
-import { CONNECTION } from './tenancy.symbols';
-import { getTenantConnection } from './tenancy.utils';
+import { tenantormconfig } from 'src/tenant.ormconfig';
+import { DataSource } from 'typeorm';
+
+import { REQUEST } from '@nestjs/core';
+
 import { decode } from 'jsonwebtoken';
-import { getConnection } from 'typeorm';
+import { TenancyService } from './tenancy.service';
+import { TENANT_DATASOURCE } from './tenancy.symbols';
 
 @Global()
 @Module({
   providers: [
     TenancyService,
     {
-      provide: CONNECTION,
+      provide: TENANT_DATASOURCE,
       scope: Scope.REQUEST,
-      useFactory: (request: ExpressRequest) => {
+      useFactory: (request: ExpressRequest, dataSource: DataSource) => {
         const { authorization } = request.headers;
-        if (authorization) {
-          const { subdomain } = decode(authorization.split(' ')[1]) as any;
-          return getTenantConnection(subdomain);
+        if (!authorization) {
+          throw new Error('subdomain not present');
         }
-        console.log('usando conexao default')
-        return getConnection();
 
-        throw new Error('No token found');
+        const { subdomain } = decode(authorization.split(' ')[1]) as any;
+
+        console.log('changing datasource to tenant_%s', subdomain);
+
+        const ds = dataSource.setOptions({
+          ...tenantormconfig,
+          schema: `tenant_${subdomain}`,
+        });
+        console.log('data src', ds.options);
+        return ds;
       },
-      inject: [REQUEST],
+      inject: [REQUEST, DataSource, TenancyService],
     },
   ],
-  exports: [CONNECTION],
+  exports: [TENANT_DATASOURCE, TenancyService],
 })
 export class TenancyModule {}

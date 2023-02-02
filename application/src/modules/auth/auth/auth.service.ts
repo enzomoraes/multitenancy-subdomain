@@ -17,7 +17,7 @@ export class AuthService {
   ): Promise<{ access_token: string }> {
     const { data } = await firstValueFrom(
       this.http.post(
-        `http://${this.configService.get(
+        `${this.configService.get(
           'KEYCLOAK_HOST',
         )}/auth/realms/${tenant}/protocol/openid-connect/token`,
         new URLSearchParams({

@@ -1,22 +1,14 @@
-import { Connection, createConnection, getConnectionManager } from 'typeorm';
-import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
+import { DataSource } from 'typeorm';
 import { tenantormconfig } from '../../tenant.ormconfig';
 
-export function getTenantConnection(subdomain: string): Promise<Connection> {
+export async function getTenantConnection(
+  subdomain: string,
+): Promise<DataSource> {
   console.log('usando conexao de tenant');
-  const connectionName = `tenant_${subdomain}`;
-  const connectionManager = getConnectionManager();
+  const schema = `tenant_${subdomain}`;
 
-  if (connectionManager.has(connectionName)) {
-    const connection = connectionManager.get(connectionName);
-    return Promise.resolve(
-      connection.isConnected ? connection : connection.connect(),
-    );
-  }
-
-  return createConnection({
+  return new DataSource({
     ...tenantormconfig,
-    name: connectionName,
-    schema: connectionName,
-  } as PostgresConnectionOptions);
+    schema: schema,
+  }).initialize();
 }

@@ -1,36 +1,65 @@
 import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
+import { getTenantConnection } from '../../tenancy/tenancy.utils';
+import { UserService } from '../..//tenanted/user/user.service';
+import { Repository } from 'typeorm';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { Tenant } from './entities/tenant.entity';
-import { getTenantConnection } from 'src/modules/tenancy/tenancy.utils';
+import { CreateUserDto } from 'src/modules/tenanted/user/dto/create-user.dto';
+import { TenancyService } from 'src/modules/tenancy/tenancy.service';
+import { User } from 'src/modules/tenanted/user/entities/user.entity';
 
 @Injectable()
 export class TenantsService {
   constructor(
     @InjectRepository(Tenant)
     private readonly tenantsRepository: Repository<Tenant>,
+    private keycloakFacade: KeycloakFacadeService,
+    private tenancyService: TenancyService,
   ) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
-    let tenant = new Tenant();
+    await this.keycloakFacade.createTenant(createTenantDto);
+
+    const tenant = new Tenant();
     tenant.subdomain = createTenantDto.subdomain;
+    const savedTenant = await this.tenantsRepository.save(tenant);
+    const schemaName = `tenant_${savedTenant.subdomain}`;
 
-    tenant = await this.tenantsRepository.save(tenant);
-
-    const schemaName = `tenant_${tenant.subdomain}`;
+    this.tenancyService.subdomain = savedTenant.subdomain;
 
     await this.tenantsRepository.query(
       `CREATE SCHEMA IF NOT EXISTS "${schemaName}"`,
     );
 
-    const connection = await getTenantConnection(`${tenant.subdomain}`);
-    console.log('subdomain connection name', tenant.subdomain);
-    await connection.runMigrations();
-    await connection.close();
+    const dataSrcTenant = await getTenantConnection(savedTenant.subdomain);
+    await dataSrcTenant.runMigrations();
 
-    return tenant;
+    const newUser: CreateUserDto = {
+      firstName: '',
+      lastName: '',
+      username: 'admin',
+      email: '',
+    };
+
+    // criando usuario admin para o tenant criado
+    await this.keycloakFacade.createUser(
+      newUser,
+      this.tenancyService.subdomain,
+    );
+
+    const user = new User();
+    user.email = newUser.email;
+    user.firstName = newUser.firstName;
+    user.lastName = newUser.lastName;
+    user.username = newUser.username;
+
+    await dataSrcTenant.getRepository(User).save(user);
+    await dataSrcTenant.destroy();
+
+    return savedTenant;
   }
 
   async findAll(): Promise<Tenant[]> {
