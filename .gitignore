@@ -1,10 +1,10 @@
 /docker/volumes
 
 # compiled output
-/application/dist
-/application/node_modules
+/wrapper-keycloak/dist
+/wrapper-keycloak/node_modules
 
-/application/.env
+/wrapper-keycloak/.env
 
 # Logs
 logs
