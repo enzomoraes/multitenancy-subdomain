@@ -8,7 +8,7 @@ docker-compose up --build -d
 
 ## Setting Keycloak up
 
-- set env variables
+- set env variables on wrapper-keycloak
   - KEYCLOAK_ADMIN_USERNAME
   - KEYCLOAK_ADMIN_PASSWORD
 - add a client in 'clients menu' for our Nest.js app that will communicate with keycloak
@@ -37,3 +37,4 @@ docker-compose up --build -d
   - POSTGRES_PASSWORD
 
 ## Now you are ready to go
+

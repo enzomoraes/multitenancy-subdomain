@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { TENANT_DATASOURCE } from '../../../modules/tenancy/tenancy.symbols';
+import { TENANT_DATASOURCE } from '../../tenancy/tenancy.symbols';
 import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
 import { TenancyService } from '../../tenancy/tenancy.service';
 import { CreateUserDto } from './dto/create-user.dto';

@@ -1,5 +1,8 @@
 POST http://localhost:3000/tenants HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer TOKEN
 
-{"subdomain": ""}
+{
+  "subdomain": "labfaber",
+  "name": "LABFABER",
+  "parent": "58ec16f1-da51-464c-84c2-0dcdae7227f1"
+}

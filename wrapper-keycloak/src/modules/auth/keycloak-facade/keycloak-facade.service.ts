@@ -36,7 +36,7 @@ export default class KeycloakFacadeService {
         .post(
           `${this.configService.get('KEYCLOAK_HOST')}/auth/admin/realms`,
           {
-            realm: tenant.subdomain,
+            realm: tenant.name,
             accessTokenLifespan: parseInt(
               this.configService.get('ACESS_TOKEN_LIFESPAN'),
             ),
