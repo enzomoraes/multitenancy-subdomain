@@ -7,9 +7,9 @@ import { Repository } from 'typeorm';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { Tenant } from './entities/tenant.entity';
-import { CreateUserDto } from 'src/modules/tenanted/user/dto/create-user.dto';
-import { TenancyService } from 'src/modules/tenancy/tenancy.service';
-import { User } from 'src/modules/tenanted/user/entities/user.entity';
+import { CreateUserDto } from '../../tenanted/user/dto/create-user.dto';
+import { TenancyService } from '../../tenancy/tenancy.service';
+import { User } from '../../tenanted/user/entities/user.entity';
 import CreateTenantValidator from './validation/create-validation';
 
 @Injectable()
@@ -25,9 +25,9 @@ export class TenantsService {
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
     await this.createValidator.validate(createTenantDto);
 
-    const parent = await this.tenantsRepository.findOne({
+    const parent = createTenantDto.parent ?await this.tenantsRepository.findOne({
       where: { id: createTenantDto.parent },
-    });
+    }) : null;
 
     await this.keycloakFacade.createTenant(createTenantDto);
 
@@ -56,10 +56,11 @@ export class TenantsService {
       lastName: '',
       username: 'admin',
       email: '',
+      password: 'admin',
     };
 
     // criando usuario admin para o tenant criado
-    await this.keycloakFacade.createUser(newUser, savedTenant.name);
+    await this.keycloakFacade.createAdminUser(newUser, savedTenant.name);
 
     const user = new User();
     user.email = newUser.email;

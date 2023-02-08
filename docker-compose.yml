@@ -14,7 +14,8 @@ services:
 
   keycloak:
     container_name: keycloak_cont
-    image: jboss/keycloak:latest
+    image: quay.io/keycloak/keycloak:20.0.3
+    command: 'start-dev --features=preview'
     depends_on:
       - keycloak-pgsql
     env_file:

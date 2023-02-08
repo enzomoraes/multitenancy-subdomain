@@ -36,5 +36,8 @@ docker-compose up --build -d
   - POSTGRES_USER
   - POSTGRES_PASSWORD
 
-## Now you are ready to go
+## Run wrapper-keycloak migrations
 
+npm run typeorm:run-public-migration
+
+## Now you are ready to go

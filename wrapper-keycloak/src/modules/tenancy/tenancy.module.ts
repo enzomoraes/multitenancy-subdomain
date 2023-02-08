@@ -1,6 +1,6 @@
 import { Global, Module, Scope } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import { tenantormconfig } from 'src/tenant.ormconfig';
+import { tenantormconfig } from '../../tenant.ormconfig';
 import { DataSource } from 'typeorm';
 
 import { REQUEST } from '@nestjs/core';

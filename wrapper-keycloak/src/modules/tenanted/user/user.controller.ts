@@ -11,8 +11,8 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtGuard } from 'src/modules/auth/jwt/jwt.guard';
-import { TenancyGuard } from 'src/modules/tenancy/tenancy.guard';
+import { JwtGuard } from '../../auth/jwt/jwt.guard';
+import { TenancyGuard } from '../../tenancy/tenancy.guard';
 
 @Controller('users')
 export class UserController {
