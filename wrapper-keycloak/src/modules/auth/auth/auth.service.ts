@@ -19,17 +19,17 @@ export class AuthService {
       this.http.post(
         `${this.configService.get(
           'KEYCLOAK_HOST',
-        )}/auth/realms/${tenant}/protocol/openid-connect/token`,
+        )}/realms/${tenant}/protocol/openid-connect/token`,
         new URLSearchParams({
-          client_id: this.configService.get('KEYCLOAK_CLIENT_ID'),
-          client_secret: this.configService.get('KEYCLOAK_CLIENT_SECRET'),
+          client_id: 'admin-cli',
           grant_type: 'password',
           username,
           password,
         }),
       ),
-    ).catch(() => {
-      return { data: { message: 'invalid credentials' } };
+    ).catch((e) => {
+      console.log(e)
+      throw { message: 'invalid credentials', statusCode: 401 };
     });
     return data;
   }

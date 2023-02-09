@@ -7,8 +7,8 @@ export class LoginController {
 
   @Post()
   public login(
-    @Body() body: { username: string; password: string; realm: string },
+    @Body() body: { username: string; password: string; tenant: string },
   ): Promise<{ access_token: string }> {
-    return this.authService.login(body.username, body.password, body.realm);
+    return this.authService.login(body.username, body.password, body.tenant);
   }
 }
