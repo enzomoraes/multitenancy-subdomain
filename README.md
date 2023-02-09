@@ -12,17 +12,21 @@ docker-compose up --build -d
   - KEYCLOAK_ADMIN_USERNAME
   - KEYCLOAK_ADMIN_PASSWORD
 - add a client in 'clients menu' for our Nest.js app that will communicate with keycloak
-  - client protocol - openid-connect
-  - client access type must be confidential
+  - client authentication -> on
+  - authorization -> off
+  - authentication flow -> standard flow
+  - direct access grantes -> on
+  - service account roles
   - save client
   - get your client_secret in credentials tab and set KEYCLOAK_CLIENT_SECRET env variable
   - your client-id is the name of the client, also set KEYCLOAK_CLIENT_ID env variable
 - get keycloak's public key token
   - go to master realm
   - realm settings
-  - key tab
+  - keys tab
   - find the algorithm RS256 with provider rsa-generated and click on public key
   - copy this key and set KEYCLOAK_PUBLIC_KEY_JWT_SECRET env variable using the following pattern: '-----BEGIN PUBLIC KEY-----\<KEY HERE>\n-----END PUBLIC KEY-----'
+  - this key is important because it is used as a way to verify the token so we don't have to make a HTTP request to validate
 - set your access and refresh token lifespans with the following variables
   - ACESS_TOKEN_LIFESPAN
   - REFRESH_TOKEN_LIFESPAN
@@ -41,3 +45,9 @@ docker-compose up --build -d
 npm run typeorm:run-public-migration
 
 ## Now you are ready to go
+
+
+### TODO
+
+endpoint to exchange user token (switching environments/tenants)
+roles creation

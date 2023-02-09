@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { firstValueFrom, map } from 'rxjs';
+import { catchError, firstValueFrom, map } from 'rxjs';
 import { CreateTenantDto } from 'src/modules/public/tenants/dto/create-tenant.dto';
 import { CreateUserDto } from 'src/modules/tenanted/user/dto/create-user.dto';
 
@@ -31,23 +31,69 @@ export default class KeycloakFacadeService {
       },
     };
 
-    return firstValueFrom(
-      this.http
-        .post(
-          `${this.configService.get('KEYCLOAK_HOST')}/admin/realms`,
-          {
-            enabled: true,
-            realm: tenant.name,
-            accessTokenLifespan: parseInt(
-              this.configService.get('ACCESS_TOKEN_LIFESPAN'),
-            ),
-            ssoSessionIdleTimeout: parseInt(
-              this.configService.get('REFRESH_TOKEN_LIFESPAN'),
-            ),
+    await firstValueFrom(
+      this.http.post(
+        `${this.configService.get('KEYCLOAK_HOST')}/admin/realms`,
+        {
+          enabled: true,
+          realm: tenant.name,
+          accessTokenLifespan: parseInt(
+            this.configService.get('ACCESS_TOKEN_LIFESPAN'),
+          ),
+          ssoSessionIdleTimeout: parseInt(
+            this.configService.get('REFRESH_TOKEN_LIFESPAN'),
+          ),
+        },
+        authHeader,
+      ),
+    );
+  }
+
+  async createMapperForRealm(tenant: string): Promise<void> {
+    const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${tenantAdminToken.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/clients?clientId=admin-cli&first=0&max=101&search=true
+    const adminCliClient = await firstValueFrom(
+      this.http.get(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients?clientId=admin-cli&search=true`,
+        authHeader,
+      ),
+    );
+
+    const adminCliClientId = adminCliClient.data[0].id;
+
+    // adding mapper for subdomain attribute
+    // http://0.0.0.0:28080/admin/realms/TENANT/clients/83efe7f5-8dba-492c-9786-34bc0ec74d72/protocol-mappers/models
+    const response = await firstValueFrom(
+      this.http.post(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients/${adminCliClientId}/protocol-mappers/models`,
+        {
+          config: {
+            'access.token.claim': 'true',
+            'aggregate.attrs': false,
+            'claim.name': 'subdomain',
+            'id.token.claim': 'true',
+            'jsonType.label': '',
+            multivalued: false,
+            'user.attribute': 'subdomain',
+            'userinfo.token.claim': 'true',
           },
-          authHeader,
-        )
-        .pipe(map((response) => response.data)),
+          name: 'subdomain',
+          protocol: 'openid-connect',
+          protocolMapper: 'oidc-usermodel-attribute-mapper',
+        },
+        authHeader,
+      ),
     );
   }
 

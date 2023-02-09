@@ -2,7 +2,6 @@ POST http://localhost:3000/tenants HTTP/1.1
 Content-Type: application/json
 
 {
-  "subdomain": "labfaber",
-  "name": "LABFABER",
-  "parent": "fd17778a-b41d-479b-980a-aac0e31f4843"
+  "subdomain": "hgjdgfgl",
+  "name": "hgjdgfgl"
 }

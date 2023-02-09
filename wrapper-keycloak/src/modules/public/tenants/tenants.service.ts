@@ -25,9 +25,11 @@ export class TenantsService {
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
     await this.createValidator.validate(createTenantDto);
 
-    const parent = createTenantDto.parent ?await this.tenantsRepository.findOne({
-      where: { id: createTenantDto.parent },
-    }) : null;
+    const parent = createTenantDto.parent
+      ? await this.tenantsRepository.findOne({
+          where: { id: createTenantDto.parent },
+        })
+      : null;
 
     await this.keycloakFacade.createTenant(createTenantDto);
 
@@ -61,6 +63,8 @@ export class TenantsService {
 
     // criando usuario admin para o tenant criado
     await this.keycloakFacade.createAdminUser(newUser, savedTenant.name);
+    // o mapper so pode ser criado após o usuario admin
+    await this.keycloakFacade.createMapperForRealm(savedTenant.name);
 
     const user = new User();
     user.email = newUser.email;
