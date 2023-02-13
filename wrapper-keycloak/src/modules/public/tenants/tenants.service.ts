@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
 import { getTenantConnection } from '../../tenancy/tenancy.utils';
-import { UserService } from '../../tenanted/user/user.service';
-import { Repository } from 'typeorm';
+import { CreateUserDto } from '../../tenanted/user/dto/create-user.dto';
+import { User } from '../../tenanted/user/entities/user.entity';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { Tenant } from './entities/tenant.entity';
-import { CreateUserDto } from '../../tenanted/user/dto/create-user.dto';
-import { TenancyService } from '../../tenancy/tenancy.service';
-import { User } from '../../tenanted/user/entities/user.entity';
 import CreateTenantValidator from './validation/create-validation';
 
 @Injectable()
@@ -18,7 +16,6 @@ export class TenantsService {
     @InjectRepository(Tenant)
     private readonly tenantsRepository: Repository<Tenant>,
     private keycloakFacade: KeycloakFacadeService,
-    private tenancyService: TenancyService,
     private createValidator: CreateTenantValidator,
   ) {}
 
@@ -62,15 +59,22 @@ export class TenantsService {
     };
 
     // criando usuario admin para o tenant criado
-    await this.keycloakFacade.createAdminUser(newUser, savedTenant.name);
+    const keycloakAdminId = await this.keycloakFacade.createAdminUser(
+      newUser,
+      savedTenant.name,
+    );
     // o mapper so pode ser criado após o usuario admin
     await this.keycloakFacade.createMapperForRealm(savedTenant.name);
+    await this.keycloakFacade.createOpenIdScopeForAdminCLIClient(
+      savedTenant.name,
+    );
 
     const user = new User();
     user.email = newUser.email;
     user.firstName = newUser.firstName;
     user.lastName = newUser.lastName;
     user.username = newUser.username;
+    user.keycloakId = keycloakAdminId;
 
     await dataSrcTenant.getRepository(User).save(user);
     await dataSrcTenant.destroy();

@@ -13,7 +13,7 @@ docker-compose up --build -d
   - KEYCLOAK_ADMIN_PASSWORD
 - add a client in 'clients menu' for our Nest.js app that will communicate with keycloak
   - client authentication -> on
-  - authorization -> off
+  - authorization -> on
   - authentication flow -> standard flow
   - direct access grantes -> on
   - service account roles
@@ -51,3 +51,4 @@ npm run typeorm:run-public-migration
 
 endpoint to exchange user token (switching environments/tenants)
 roles creation
+  - resource profiles - many roles

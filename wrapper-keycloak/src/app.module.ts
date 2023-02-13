@@ -8,6 +8,8 @@ import { TenantsModule } from './modules/public/tenants/tenants.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 import { UserModule } from './modules/tenanted/user/user.module';
 import { ormconfig } from './ormconfig';
+import { RolesModule } from './modules/tenanted/roles/roles.module';
+import { ProfilesModule } from './modules/tenanted/profiles/profiles.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { ormconfig } from './ormconfig';
     TenantsModule,
     UserModule,
     AuthModule,
+    RolesModule,
+    ProfilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

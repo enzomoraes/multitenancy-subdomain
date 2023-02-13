@@ -1,15 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { TENANT_DATASOURCE } from '../../tenancy/tenancy.symbols';
 import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
 import { TenancyService } from '../../tenancy/tenancy.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import { Profile } from '../profiles/entities/profile.entity';
 
 @Injectable()
 export class UserService {
   private readonly usersRepository: Repository<User>;
+  private readonly profilesRepository: Repository<Profile>;
 
   constructor(
     @Inject(TENANT_DATASOURCE) dataSource: DataSource,
@@ -17,10 +19,11 @@ export class UserService {
     private tenancyService: TenancyService,
   ) {
     this.usersRepository = dataSource.getRepository(User);
+    this.profilesRepository = dataSource.getRepository(Profile);
   }
 
   async create(createUserDto: CreateUserDto) {
-    await this.keycloakFacade.createUser(
+    const keycloakUserId = await this.keycloakFacade.createUser(
       createUserDto,
       this.tenancyService.subdomain,
     );
@@ -30,23 +33,35 @@ export class UserService {
     user.firstName = createUserDto.firstName;
     user.lastName = createUserDto.lastName;
     user.username = createUserDto.username;
+    user.keycloakId = keycloakUserId;
 
     return this.usersRepository.save(user);
+  }
+
+  async assignProfiles(userId: string, profileIds: string[]) {
+    const profiles = await this.profilesRepository.find({
+      where: { id: In(profileIds) },
+    });
+
+    // TODO: inserir roles no keycloak
+    return this.usersRepository.update(userId, {
+      profiles,
+    });
   }
 
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} user`;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
+  update(id: string, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} user`;
   }
 }

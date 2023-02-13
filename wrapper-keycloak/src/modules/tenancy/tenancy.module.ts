@@ -1,13 +1,12 @@
 import { Global, Module, Scope } from '@nestjs/common';
 import { Request as ExpressRequest } from 'express';
-import { tenantormconfig } from '../../tenant.ormconfig';
-import { DataSource } from 'typeorm';
 
 import { REQUEST } from '@nestjs/core';
 
 import { decode } from 'jsonwebtoken';
 import { TenancyService } from './tenancy.service';
 import { TENANT_DATASOURCE } from './tenancy.symbols';
+import { getTenantConnection } from './tenancy.utils';
 
 @Global()
 @Module({
@@ -16,24 +15,22 @@ import { TENANT_DATASOURCE } from './tenancy.symbols';
     {
       provide: TENANT_DATASOURCE,
       scope: Scope.REQUEST,
-      useFactory: (request: ExpressRequest, dataSource: DataSource) => {
+      useFactory: (request: ExpressRequest) => {
         const { authorization } = request.headers;
         if (!authorization) {
           throw new Error('subdomain not present');
         }
+        try {
+          const { subdomain } = decode(authorization.split(' ')[1]) as any;
 
-        const { subdomain } = decode(authorization.split(' ')[1]) as any;
+          console.log('changing datasource to tenant_%s', subdomain);
 
-        console.log('changing datasource to tenant_%s', subdomain);
-
-        const ds = dataSource.setOptions({
-          ...tenantormconfig,
-          schema: `tenant_${subdomain}`,
-        });
-        console.log('data src', ds.options);
-        return ds;
+          return getTenantConnection(subdomain);
+        } catch (e) {
+          throw new Error('Could not change datasource');
+        }
       },
-      inject: [REQUEST, DataSource, TenancyService],
+      inject: [REQUEST, TenancyService],
     },
   ],
   exports: [TENANT_DATASOURCE, TenancyService],

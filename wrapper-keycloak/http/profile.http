@@ -1,0 +1,21 @@
+POST http://localhost:3000/profiles HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5clc1RU9YY1pZaVBRWUtwbVhHOUx1alk5VDdTTEQ3QVRQdkdDQVFHdTlBIn0.eyJleHAiOjE2NzYzMTc5ODksImlhdCI6MTY3NjMxNzY4OSwianRpIjoiY2IyOWU1MjgtMmJmMC00YjU5LTgwZGQtYzQ4MGExN2JlNjlhIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDoyODA4MC9yZWFsbXMvQ0VSVEkiLCJzdWIiOiIzZDg4MjcwNy1hMDA0LTRlN2MtOWM5NC1iMjRiMmJiNGIyYTAiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiJhZG1pbi1jbGkiLCJzZXNzaW9uX3N0YXRlIjoiY2NmNzBlZTktNWIxYi00ZjIxLWIxZjItNTIwZTYxZDI0NDNlIiwiYWNyIjoiMSIsInNjb3BlIjoicHJvZmlsZSBlbWFpbCBvcGVuaWQiLCJzaWQiOiJjY2Y3MGVlOS01YjFiLTRmMjEtYjFmMi01MjBlNjFkMjQ0M2UiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwic3ViZG9tYWluIjoiQ0VSVEkiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJhZG1pbiIsImdpdmVuX25hbWUiOiIiLCJmYW1pbHlfbmFtZSI6IiJ9.nHrRvlY01CcU3nznTeBjb7hZY_YAl1UyBUiPk8EdA_UIAk-vhAiOyqAQSVCo05_B4QYBm6vrPi-eJoZhaMIDsd_vA8YtUnRuHVeTVyaqb8Het7tVGDDyfkHEoyto7G2ot7A-usLDjXP7Mr7Rhl7VUvnSMahY260X3nWzL2p7P9_PoFqkfyE3ier2r7h63GCzWDQtEBXrEjMwtSnsfhSVi5_huhnHBE2LmKYO-esZgHUmxaJ5IjQQ7RMs5wQNGJMFl7mgOp46R_guExINQxcPAIcJbFkXo3ZiPiXxJygTnZgtCvdm4bf2FlvpihvGoy3qRxoStcqj-YhWrvByHABeLg
+
+{
+    "name": "gerente",
+    "roles": [{ "name": "create:metrics" },
+  { "name": "view:metrics" },
+  { "name": "update:metrics" },
+  { "name": "delete:metrics" },
+
+  { "name": "create:rules" },
+  { "name": "view:rules" },
+  { "name": "update:rules" },
+  { "name": "delete:rules" },
+
+  { "name": "create:sectors" },
+  { "name": "view:sectors" },
+  { "name": "update:sectors" },
+  { "name": "delete:sectors" }]
+}

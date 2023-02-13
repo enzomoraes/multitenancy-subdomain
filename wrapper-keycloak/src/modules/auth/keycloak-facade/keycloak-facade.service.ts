@@ -49,6 +49,85 @@ export default class KeycloakFacadeService {
     );
   }
 
+  /**
+   * This method creates openid scope for admin-cli so the admin-cli client can request userinfo to validate token
+   * @param tenant tenant name
+   */
+  async createOpenIdScopeForAdminCLIClient(tenant: string): Promise<void> {
+    const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${tenantAdminToken.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/client-scopes
+    // adding client-scope openid to the realm so we can request userinfo
+    const clientScopeResponse = await firstValueFrom(
+      this.http.post(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/client-scopes`,
+        {
+          name: 'openid',
+          description: '',
+          attributes: {
+            'consent.screen.text': '',
+            'display.on.consent.screen': 'true',
+            'include.in.token.scope': 'true',
+            'gui.order': '',
+          },
+          type: 'default',
+          protocol: 'openid-connect',
+        },
+        authHeader,
+      ),
+    );
+    const clientScopeId = clientScopeResponse.headers.location.substring(
+      clientScopeResponse.headers.location.lastIndexOf('/') + 1,
+    );
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/clients?clientId=admin-cli&first=0&max=101&search=true
+    const adminCliClient = await firstValueFrom(
+      this.http.get(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients?clientId=admin-cli&search=true`,
+        authHeader,
+      ),
+    );
+
+    const adminCliClientId = adminCliClient.data[0].id;
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/clients/CLIENT-ID/default-client-scopes/CLIENT-SCOPE-ID
+    // adding openid scope to admin-cli client
+    await firstValueFrom(
+      this.http.put(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients/${adminCliClientId}/default-client-scopes/${clientScopeId}`,
+        {
+          name: 'openid',
+          description: '',
+          attributes: {
+            'consent.screen.text': '',
+            'display.on.consent.screen': 'true',
+            'include.in.token.scope': 'true',
+            'gui.order': '',
+          },
+          type: 'default',
+          protocol: 'openid-connect',
+        },
+        authHeader,
+      ),
+    );
+  }
+
+  /**
+   * This method creates a mapper for subdomain attribute in the realm, so the attribute subdomain goes into the jwt token
+   * @param tenant tenant name
+   */
   async createMapperForRealm(tenant: string): Promise<void> {
     const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
     const authHeader = {
@@ -105,7 +184,7 @@ export default class KeycloakFacadeService {
   async createAdminUser(
     createUserDto: CreateUserDto,
     tenant: string,
-  ): Promise<void> {
+  ): Promise<string> {
     const adminToken = await this.getAdminTokenMaster();
     const accessToken = adminToken.access_token;
     const authHeader = {
@@ -201,6 +280,7 @@ export default class KeycloakFacadeService {
         ),
       );
     }
+    return userId;
   }
 
   /**
@@ -211,7 +291,7 @@ export default class KeycloakFacadeService {
   async createUser(
     createUserDto: CreateUserDto,
     tenant: string,
-  ): Promise<void> {
+  ): Promise<string> {
     const adminToken = await this.getAdminTokenMaster();
     const accessToken = adminToken.access_token;
     const authHeader = {
@@ -258,6 +338,8 @@ export default class KeycloakFacadeService {
         authHeader,
       ),
     );
+
+    return userId;
   }
 
   /**
@@ -299,6 +381,18 @@ export default class KeycloakFacadeService {
     );
   }
 
+  async userInfo(tenant: string, token: string) {
+    return firstValueFrom(
+      this.http
+        .get(
+          `${this.configService.get(
+            'KEYCLOAK_HOST',
+          )}/realms/${tenant}/protocol/openid-connect/userinfo`,
+          { headers: { authorization: token } },
+        )
+        .pipe(map((response) => response.data)),
+    );
+  }
   /**
    * This method get the tokens from application defined client to manage keycloak
    * @returns IKeycloakTokens
