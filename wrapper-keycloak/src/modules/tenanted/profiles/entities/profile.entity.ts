@@ -14,7 +14,7 @@ export class Profile extends AbstractEntity {
   @Column()
   name: string;
 
-  @ManyToMany(() => Role)
+  @ManyToMany(() => Role, (role) => role.name, { cascade: true })
   @JoinTable()
   roles: Role[];
 }

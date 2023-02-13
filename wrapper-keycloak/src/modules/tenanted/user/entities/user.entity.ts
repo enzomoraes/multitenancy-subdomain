@@ -19,7 +19,7 @@ export class User extends AbstractEntity {
   @Column()
   keycloakId: string;
 
-  @ManyToMany(() => Profile)
+  @ManyToMany(() => Profile, (profile) => profile.id, { cascade: true })
   @JoinTable()
   profiles: Profile[];
 }
