@@ -50,5 +50,4 @@ npm run typeorm:run-public-migration
 ### TODO
 
 endpoint to exchange user token (switching environments/tenants)
-roles creation
-  - resource profiles - many roles
+- resource profiles
