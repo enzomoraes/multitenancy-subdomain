@@ -24,13 +24,12 @@ import { getTenantConnection } from './tenancy.utils';
           const { subdomain } = decode(authorization.split(' ')[1]) as any;
 
           console.log('changing datasource to tenant_%s', subdomain);
-
           return getTenantConnection(subdomain);
         } catch (e) {
           throw new Error('Could not change datasource');
         }
       },
-      inject: [REQUEST, TenancyService],
+      inject: [REQUEST],
     },
   ],
   exports: [TENANT_DATASOURCE, TenancyService],

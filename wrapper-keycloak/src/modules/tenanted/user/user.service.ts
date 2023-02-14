@@ -41,10 +41,26 @@ export class UserService {
   async assignProfiles(userId: string, profileIds: string[]) {
     const profiles = await this.profilesRepository.find({
       where: { id: In(profileIds) },
+      relations: ['roles'],
     });
 
-    // TODO: inserir roles no keycloak
     const user = await this.usersRepository.findOneBy({ id: userId });
+
+    const roles = profiles
+      .map((profile) => profile.roles)
+      .reduce((acc, curr) => {
+        return [...acc, ...curr];
+      }, []);
+
+    // usingn set to remove duplicates
+    const set = new Set(roles);
+
+    await this.keycloakFacade.setRealmRolesForUser(
+      user.keycloakId,
+      this.tenancyService.subdomain,
+      Array.from(set),
+    );
+
     user.profiles = profiles;
 
     return this.usersRepository.save(user);

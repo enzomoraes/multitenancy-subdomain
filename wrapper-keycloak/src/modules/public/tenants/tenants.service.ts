@@ -68,6 +68,11 @@ export class TenantsService {
     await this.keycloakFacade.createOpenIdScopeForAdminCLIClient(
       savedTenant.name,
     );
+    await this.keycloakFacade.insertRolesInNewlyCreatedRealm(savedTenant.name);
+    await this.keycloakFacade.setAllRealmRolesForUser(
+      keycloakAdminId,
+      savedTenant.name,
+    );
 
     const user = new User();
     user.email = newUser.email;
