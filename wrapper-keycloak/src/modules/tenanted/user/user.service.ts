@@ -44,9 +44,10 @@ export class UserService {
     });
 
     // TODO: inserir roles no keycloak
-    return this.usersRepository.update(userId, {
-      profiles,
-    });
+    const user = await this.usersRepository.findOneBy({ id: userId });
+    user.profiles = profiles;
+
+    return this.usersRepository.save(user);
   }
 
   async findAll(): Promise<User[]> {

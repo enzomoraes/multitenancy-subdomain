@@ -1,3 +1,5 @@
+import { Role } from "src/modules/tenanted/roles/entities/role.entity";
+import _roles from "src/_roles";
 import { MigrationInterface, QueryRunner } from "typeorm";
 import { PostgresConnectionOptions } from "typeorm/driver/postgres/PostgresConnectionOptions";
 
@@ -22,6 +24,14 @@ export class firstMigration1676320259522 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "${schema}"."profile_roles_role" ADD CONSTRAINT "FK_${schema}_edb80d0e18e840537868fc8ad05" FOREIGN KEY ("roleName") REFERENCES "${schema}"."role"("name") ON DELETE CASCADE ON UPDATE CASCADE`);
         await queryRunner.query(`ALTER TABLE "${schema}"."user_profiles_profile" ADD CONSTRAINT "FK_${schema}_f242c0b590e77b91136f23e40bd" FOREIGN KEY ("userId") REFERENCES "${schema}"."user"("id") ON DELETE CASCADE ON UPDATE CASCADE`);
         await queryRunner.query(`ALTER TABLE "${schema}"."user_profiles_profile" ADD CONSTRAINT "FK_${schema}_39cce0bc4925eb8a93ac1420dee" FOREIGN KEY ("profileId") REFERENCES "${schema}"."profile"("id") ON DELETE CASCADE ON UPDATE CASCADE`);
+
+      // inserting roles
+      for (const role of _roles) {
+        await queryRunner.manager.save<Role>(
+          queryRunner.manager.create<Role>(Role, { name: role.name }),
+        );
+      }
+        
     }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
