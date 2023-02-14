@@ -69,7 +69,7 @@ export class TenantsService {
       savedTenant.name,
     );
     await this.keycloakFacade.insertRolesInNewlyCreatedRealm(savedTenant.name);
-    await this.keycloakFacade.setAllRealmRolesForUser(
+    await this.keycloakFacade.assignAllRealmRolesForUser(
       keycloakAdminId,
       savedTenant.name,
     );

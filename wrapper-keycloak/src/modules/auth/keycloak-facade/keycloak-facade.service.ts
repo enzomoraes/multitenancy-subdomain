@@ -23,7 +23,7 @@ export default class KeycloakFacadeService {
    * This method is responsible for creating a tenant in keycloak
    * @param tenant information
    */
-  async createTenant(tenant: CreateTenantDto) {
+  public async createTenant(tenant: CreateTenantDto) {
     const adminToken = await this.getAdminTokenMaster();
     const accessToken = adminToken.access_token;
     const authHeader = {
@@ -55,7 +55,7 @@ export default class KeycloakFacadeService {
    * This method creates openid scope for admin-cli so the admin-cli client can request userinfo to validate token
    * @param tenant tenant name
    */
-  async createOpenIdScopeForAdminCLIClient(tenant: string): Promise<void> {
+  public async createOpenIdScopeForAdminCLIClient(tenant: string): Promise<void> {
     const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
     const authHeader = {
       headers: {
@@ -130,7 +130,7 @@ export default class KeycloakFacadeService {
    * This method creates a mapper for subdomain attribute in the realm, so the attribute subdomain goes into the jwt token
    * @param tenant tenant name
    */
-  async createMapperForRealm(tenant: string): Promise<void> {
+  public async createMapperForRealm(tenant: string): Promise<void> {
     const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
     const authHeader = {
       headers: {
@@ -182,7 +182,7 @@ export default class KeycloakFacadeService {
    * This method inserts predefined roles in newly created keycloak tenant
    * @param tenant
    */
-  async insertRolesInNewlyCreatedRealm(tenant: string): Promise<void> {
+  public async insertRolesInNewlyCreatedRealm(tenant: string): Promise<void> {
     const tenantAdminToken = await this.getAdminTokenByTenant(tenant);
     const authHeader = {
       headers: {
@@ -213,7 +213,7 @@ export default class KeycloakFacadeService {
    * @param createUserDto
    * @param tenant
    */
-  async createAdminUser(
+  public async createAdminUser(
     createUserDto: CreateUserDto,
     tenant: string,
   ): Promise<string> {
@@ -273,7 +273,7 @@ export default class KeycloakFacadeService {
    * @param createUserDto
    * @param tenant
    */
-  async createUser(
+  public async createUser(
     createUserDto: CreateUserDto,
     tenant: string,
   ): Promise<string> {
@@ -333,7 +333,7 @@ export default class KeycloakFacadeService {
    * @param targetTenant of which the token will be exchanged
    * @returns IKeycloakTokens
    */
-  async exchangeToken(
+  public async exchangeToken(
     targetUser: string,
     targetTenant: string,
   ): Promise<IKeycloakTokens> {
@@ -366,7 +366,7 @@ export default class KeycloakFacadeService {
     );
   }
 
-  async userInfo(tenant: string, token: string) {
+  public async userInfo(tenant: string, token: string) {
     return firstValueFrom(
       this.http
         .get(
@@ -376,6 +376,107 @@ export default class KeycloakFacadeService {
           { headers: { authorization: token } },
         )
         .pipe(map((response) => response.data)),
+    );
+  }
+
+  /**
+   * This method searches all realm roles in keycloak and assign it to a user
+   * @param userId
+   * @param tenant
+   */
+  public async assignAllRealmRolesForUser(userId: string, tenant: string) {
+    const adminToken = await this.getAdminTokenMaster();
+    const accessToken = adminToken.access_token;
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // http://0.0.0.0:28080/admin/realms/LABFABER/users/2f9db479-377f-4449-a152-88cab9b0a034/role-mappings/realm/available?first=0&max=101
+    // searching available roles so we set all to the user
+    const rolesResponse = await firstValueFrom(
+      this.http.get(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm/available?first=0&max=101`,
+        authHeader,
+      ),
+    );
+    // client: "account"
+    // clientId: "c0d1dd45-5498-4985-be20-785c433ffe84"
+    // description: "${role_view-groups}"
+    // id: "97f7f0ee-5b43-439e-b72e-422f53e7ca6a"
+    // role: "view-groups"
+    const roles = rolesResponse.data;
+
+    // http://0.0.0.0:28080/admin/realms/LABFABER/users/2f9db479-377f-4449-a152-88cab9b0a034/role-mappings/realm
+    await firstValueFrom(
+      this.http.post(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm`,
+        roles,
+        authHeader,
+      ),
+    );
+  }
+
+  /**
+   * This method assign roles to a user
+   * @param userId
+   * @param tenant
+   * @param roles to be assigned to the user
+   */
+  public async assignRealmRolesForUser(
+    userId: string,
+    tenant: string,
+    roles: Role[],
+  ) {
+    const adminToken = await this.getAdminTokenMaster();
+    const accessToken = adminToken.access_token;
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/users/USERID/role-mappings/realm/available?first=0&max=101
+    // searching available roles so we set all to the user
+    const rolesResponse = await firstValueFrom(
+      this.http.get(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm/available?first=0&max=101`,
+        authHeader,
+      ),
+    );
+    // {
+    //   clientRole: false;
+    //   composite: false;
+    //   containerId: '1a87dce2-7b99-48d6-b94c-a00620a4e76f';
+    //   description: '';
+    //   id: '14c6ec7e-890f-4cf1-b85d-f75c866ee685';
+    //   name: 'create:rules';
+    // }
+    const allKeycloakRoles = rolesResponse.data;
+
+    const rolesToInsert = allKeycloakRoles.filter(
+      (keycloakRole: { name: string }) =>
+        roles.find((r) => r.name === keycloakRole.name),
+    );
+
+    // http://0.0.0.0:28080/admin/realms/TENANT/users/USERID/role-mappings/realm
+    await firstValueFrom(
+      this.http.post(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm`,
+        rolesToInsert,
+        authHeader,
+      ),
     );
   }
 
@@ -442,107 +543,6 @@ export default class KeycloakFacadeService {
         ),
       );
     }
-  }
-
-  /**
-   * This method searches all realm roles in keycloak and assign it to a user
-   * @param userId
-   * @param tenant
-   */
-  public async setAllRealmRolesForUser(userId: string, tenant: string) {
-    const adminToken = await this.getAdminTokenMaster();
-    const accessToken = adminToken.access_token;
-    const authHeader = {
-      headers: {
-        Authorization: `bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    };
-
-    // http://0.0.0.0:28080/admin/realms/LABFABER/users/2f9db479-377f-4449-a152-88cab9b0a034/role-mappings/realm/available?first=0&max=101
-    // searching available roles so we set all to the user
-    const rolesResponse = await firstValueFrom(
-      this.http.get(
-        `${this.configService.get(
-          'KEYCLOAK_HOST',
-        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm/available?first=0&max=101`,
-        authHeader,
-      ),
-    );
-    // client: "account"
-    // clientId: "c0d1dd45-5498-4985-be20-785c433ffe84"
-    // description: "${role_view-groups}"
-    // id: "97f7f0ee-5b43-439e-b72e-422f53e7ca6a"
-    // role: "view-groups"
-    const roles = rolesResponse.data;
-
-    // http://0.0.0.0:28080/admin/realms/LABFABER/users/2f9db479-377f-4449-a152-88cab9b0a034/role-mappings/realm
-    await firstValueFrom(
-      this.http.post(
-        `${this.configService.get(
-          'KEYCLOAK_HOST',
-        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm`,
-        roles,
-        authHeader,
-      ),
-    );
-  }
-
-  /**
-   * This method assign roles it to a user
-   * @param userId
-   * @param tenant
-   * @param roles to be assigned to the user
-   */
-  public async setRealmRolesForUser(
-    userId: string,
-    tenant: string,
-    roles: Role[],
-  ) {
-    const adminToken = await this.getAdminTokenMaster();
-    const accessToken = adminToken.access_token;
-    const authHeader = {
-      headers: {
-        Authorization: `bearer ${accessToken}`,
-        'Content-Type': 'application/json',
-      },
-    };
-
-    // http://0.0.0.0:28080/admin/realms/TENANT/users/USERID/role-mappings/realm/available?first=0&max=101
-    // searching available roles so we set all to the user
-    const rolesResponse = await firstValueFrom(
-      this.http.get(
-        `${this.configService.get(
-          'KEYCLOAK_HOST',
-        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm/available?first=0&max=101`,
-        authHeader,
-      ),
-    );
-    // {
-    //   clientRole: false;
-    //   composite: false;
-    //   containerId: '1a87dce2-7b99-48d6-b94c-a00620a4e76f';
-    //   description: '';
-    //   id: '14c6ec7e-890f-4cf1-b85d-f75c866ee685';
-    //   name: 'create:rules';
-    // }
-    const allKeycloakRoles = rolesResponse.data;
-
-    const rolesToInsert = allKeycloakRoles.filter(
-      (keycloakRole: { name: string }) =>
-        roles.find((r) => r.name === keycloakRole.name),
-    );
-
-    // http://0.0.0.0:28080/admin/realms/TENANT/users/USERID/role-mappings/realm
-    await firstValueFrom(
-      this.http.post(
-        `${this.configService.get(
-          'KEYCLOAK_HOST',
-        )}/admin/realms/${tenant}/users/${userId}/role-mappings/realm`,
-        rolesToInsert,
-        authHeader,
-      ),
-    );
   }
 
   /**

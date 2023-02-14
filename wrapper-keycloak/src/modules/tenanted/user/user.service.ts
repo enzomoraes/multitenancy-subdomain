@@ -55,7 +55,7 @@ export class UserService {
     // usingn set to remove duplicates
     const set = new Set(roles);
 
-    await this.keycloakFacade.setRealmRolesForUser(
+    await this.keycloakFacade.assignRealmRolesForUser(
       user.keycloakId,
       this.tenancyService.subdomain,
       Array.from(set),
