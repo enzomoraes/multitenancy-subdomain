@@ -28,7 +28,7 @@ docker-compose up --build -d
   - copy this key and set KEYCLOAK_PUBLIC_KEY_JWT_SECRET env variable using the following pattern: '-----BEGIN PUBLIC KEY-----\<KEY HERE>\n-----END PUBLIC KEY-----'
   - this key is important because it is used as a way to verify the token so we don't have to make a HTTP request to validate
 - set your access and refresh token lifespans with the following variables
-  - ACESS_TOKEN_LIFESPAN
+  - ACCESS_TOKEN_LIFESPAN
   - REFRESH_TOKEN_LIFESPAN
 
 ## Configuring application
@@ -51,3 +51,5 @@ npm run typeorm:run-public-migration
 
 endpoint to exchange user token (switching environments/tenants)
 - resource profiles
+  - ao adicionar profile em user, adicionar roles do user no keycloak
+- adicionar roles no keycloak quando criar tenant
