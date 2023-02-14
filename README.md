@@ -50,6 +50,5 @@ npm run typeorm:run-public-migration
 ### TODO
 
 endpoint to exchange user token (switching environments/tenants)
-- resource profiles
-  - ao adicionar profile em user, adicionar roles do user no keycloak
-- adicionar roles no keycloak quando criar tenant
+roles integrity when changing profile's roles that users are assigned to
+when creating an user, replicate it to all child tenants. Allow creation only in parent realm?
