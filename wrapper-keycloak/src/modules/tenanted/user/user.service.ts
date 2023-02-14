@@ -6,12 +6,10 @@ import { TenancyService } from '../../tenancy/tenancy.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { Profile } from '../profiles/entities/profile.entity';
 
 @Injectable()
 export class UserService {
   private readonly usersRepository: Repository<User>;
-  private readonly profilesRepository: Repository<Profile>;
 
   constructor(
     @Inject(TENANT_DATASOURCE) dataSource: DataSource,
@@ -19,7 +17,6 @@ export class UserService {
     private tenancyService: TenancyService,
   ) {
     this.usersRepository = dataSource.getRepository(User);
-    this.profilesRepository = dataSource.getRepository(Profile);
   }
 
   async create(createUserDto: CreateUserDto) {
@@ -38,32 +35,13 @@ export class UserService {
     return this.usersRepository.save(user);
   }
 
-  async assignProfiles(userId: string, profileIds: string[]) {
-    const profiles = await this.profilesRepository.find({
-      where: { id: In(profileIds) },
-      relations: ['roles'],
-    });
-
-    const user = await this.usersRepository.findOneBy({ id: userId });
-
-    const roles = profiles
-      .map((profile) => profile.roles)
-      .reduce((acc, curr) => {
-        return [...acc, ...curr];
-      }, []);
-
-    // usingn set to remove duplicates
-    const set = new Set(roles);
-
-    await this.keycloakFacade.assignRealmRolesForUser(
+  async assignGroup(userId: string, groupId: string) {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    return this.keycloakFacade.assignGroupToUser(
       user.keycloakId,
+      groupId,
       this.tenancyService.subdomain,
-      Array.from(set),
     );
-
-    user.profiles = profiles;
-
-    return this.usersRepository.save(user);
   }
 
   async findAll(): Promise<User[]> {

@@ -24,9 +24,9 @@ export class UserController {
   }
 
   @UseGuards(TenancyGuard)
-  @Post('/:id/profiles')
-  assignProfiles(@Param('id') userId: string, @Body() profileIds: string[]) {
-    return this.userService.assignProfiles(userId, profileIds);
+  @Post('/:userId/groups/:groupId')
+  assignProfiles(@Param('userId') userId: string, @Param('groupId') groupId: string) {
+    return this.userService.assignGroup(userId, groupId);
   }
 
   @UseGuards(TenancyGuard)

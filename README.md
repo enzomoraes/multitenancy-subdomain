@@ -50,5 +50,10 @@ npm run typeorm:run-public-migration
 ### TODO
 
 endpoint to exchange user token (switching environments/tenants)
-roles integrity when changing profile's roles that users are assigned to
-when creating an user, replicate it to all child tenants. Allow creation only in parent realm?
+ajustar migrations (sem profile agr)
+ver pq banco do keycloak está apagando qnd sobe de novo
+
+
+### Questions
+
+when creating an user, replicate it to all child tenants? Allow creation only in parent realm? How to control wich ones he has access to? checkbox to insert user in realm?

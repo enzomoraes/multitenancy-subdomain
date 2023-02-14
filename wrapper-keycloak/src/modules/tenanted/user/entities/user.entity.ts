@@ -1,6 +1,5 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
 import { AbstractEntity } from '../../../../abstract.entity';
-import { Profile } from '../../profiles/entities/profile.entity';
 
 @Entity()
 export class User extends AbstractEntity {
@@ -18,8 +17,4 @@ export class User extends AbstractEntity {
 
   @Column()
   keycloakId: string;
-
-  @ManyToMany(() => Profile, (profile) => profile.id, { cascade: true })
-  @JoinTable()
-  profiles: Profile[];
 }

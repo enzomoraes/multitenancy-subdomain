@@ -1,17 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { TENANT_DATASOURCE } from '../../tenancy/tenancy.symbols';
-import { DataSource, Repository } from 'typeorm';
-import { Role } from './entities/role.entity';
+import { Injectable } from '@nestjs/common';
+import KeycloakFacadeService from 'src/modules/auth/keycloak-facade/keycloak-facade.service';
+import { TenancyService } from 'src/modules/tenancy/tenancy.service';
 
 @Injectable()
 export class RolesService {
-  private readonly rolesRepository: Repository<Role>;
-
-  constructor(@Inject(TENANT_DATASOURCE) dataSource: DataSource) {
-    this.rolesRepository = dataSource.getRepository(Role);
-  }
+  constructor(
+    private tenancyService: TenancyService,
+    private keycloakFacade: KeycloakFacadeService,
+  ) {}
 
   findAll() {
-    return this.rolesRepository.find();
+    return this.keycloakFacade.getRoles(this.tenancyService.subdomain);
   }
 }

@@ -6,10 +6,10 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { TenantsModule } from './modules/public/tenants/tenants.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
+import { GroupsModule } from './modules/tenanted/groups/groups.module';
+import { RolesModule } from './modules/tenanted/roles/roles.module';
 import { UserModule } from './modules/tenanted/user/user.module';
 import { ormconfig } from './ormconfig';
-import { RolesModule } from './modules/tenanted/roles/roles.module';
-import { ProfilesModule } from './modules/tenanted/profiles/profiles.module';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { ProfilesModule } from './modules/tenanted/profiles/profiles.module';
     UserModule,
     AuthModule,
     RolesModule,
-    ProfilesModule,
+    GroupsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
