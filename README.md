@@ -56,4 +56,4 @@ adicionar no readme como fazer client gerar token com roles
 
 ### Questions
 
-when creating an user, replicate it to all child tenants? Allow creation only in parent realm? How to control wich ones he has access to? checkbox to insert user in realm?
+when creating an user, replicate it to all child tenants? Allow creation only in parent realm? How to control wich ones he has access to? checkbox to insert user in realm? How to deal with the password on replicating users to child realms?
