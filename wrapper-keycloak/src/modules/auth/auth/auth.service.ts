@@ -17,4 +17,8 @@ export class AuthService {
       throw { message: 'invalid credentials', statusCode: 401 };
     });
   }
+
+  exchangeToken(username: string, tenant: string): Promise<IKeycloakTokens> {
+    return this.keycloakFacade.exchangeToken(username, tenant);
+  }
 }

@@ -1,14 +1,14 @@
 import { HttpModule } from '@nestjs/axios';
-import { Global, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AuthService } from './auth/auth.service';
-import { LoginController } from './auth/login/login.controller';
+import { AuthController } from './auth/auth/auth.controller';
 import { JwtStrategyService } from './jwt-strategy/jwt-strategy.service';
 import KeycloakFacadeService from './keycloak-facade/keycloak-facade.service';
 
 @Module({
   imports: [HttpModule],
   providers: [AuthService, JwtStrategyService, KeycloakFacadeService],
-  controllers: [LoginController],
+  controllers: [AuthController],
   exports: [KeycloakFacadeService],
 })
 export class AuthModule {}
