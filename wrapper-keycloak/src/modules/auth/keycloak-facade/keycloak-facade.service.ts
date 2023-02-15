@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { catchError, firstValueFrom, map } from 'rxjs';
+import { catchError, firstValueFrom, map, tap } from 'rxjs';
 import _roles from '../../../_roles';
 import { CreateTenantDto } from '../../public/tenants/dto/create-tenant.dto';
 import { CreateUserDto } from '../../tenanted/user/dto/create-user.dto';
@@ -53,7 +53,7 @@ export default class KeycloakFacadeService {
    * This method is responsible for creating a tenant in keycloak
    * @param tenant information
    */
-  public async createTenant(tenant: CreateTenantDto) {
+  public async createTenant(tenant: CreateTenantDto): Promise<void> {
     const adminToken = await this.getAdminTokenMaster();
     const accessToken = adminToken.access_token;
     const authHeader = {
@@ -81,6 +81,42 @@ export default class KeycloakFacadeService {
     );
   }
 
+  /**
+   * Returns a brief representation of all tenants
+   * @returns
+   */
+  public async allTenants(): Promise<{ id: string; realm: string }[]> {
+    const adminToken = await this.getAdminTokenMaster();
+    const accessToken = adminToken.access_token;
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    //http://localhost:28080/admin/realms?briefRepresentation=true
+    return firstValueFrom(
+      this.http
+        .get(
+          `${this.configService.get(
+            'KEYCLOAK_HOST',
+          )}/admin/realms?briefRepresentation=true`,
+          authHeader,
+        )
+        .pipe(
+          map((response) => {
+            console.log(response.data);
+            return response.data;
+          }),
+        ),
+    );
+  }
+
+  /**
+   * This method inserts all realm roles to be allowed to be in JWT
+   * @param tenant
+   */
   public async allowAllRealmRolesScope(tenant: string): Promise<void> {
     const adminToken = await this.getAdminTokenMaster();
     const accessToken = adminToken.access_token;

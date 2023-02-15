@@ -9,6 +9,9 @@ export class Tenant extends AbstractEntity {
   @Column()
   name: string;
 
+  @Column()
+  keycloakId: string;
+
   @ManyToOne(() => Tenant, (tenant) => tenant.parent)
   parent?: Tenant;
 

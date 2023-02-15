@@ -1,5 +1,5 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { TenancyGuard } from 'src/modules/tenancy/tenancy.guard';
+import { TenancyGuard } from '../../tenancy/tenancy.guard';
 import { IKeycloakTokens } from '../keycloak-facade/keycloak-facade.service';
 import { AuthService } from './auth.service';
 

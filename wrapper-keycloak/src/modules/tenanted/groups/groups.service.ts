@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import KeycloakFacadeService, {
   IKeycloakRealmRoles,
-} from 'src/modules/auth/keycloak-facade/keycloak-facade.service';
-import { TenancyService } from 'src/modules/tenancy/tenancy.service';
+} from '../../auth/keycloak-facade/keycloak-facade.service';
+import { TenancyService } from '../../tenancy/tenancy.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
 

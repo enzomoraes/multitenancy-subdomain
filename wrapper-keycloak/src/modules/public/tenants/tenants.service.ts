@@ -30,8 +30,13 @@ export class TenantsService {
 
     await this.keycloakFacade.createTenant(createTenantDto);
 
+    const tenantKeycloakId = (await this.keycloakFacade.allTenants()).find(
+      (t) => t.realm === createTenantDto.name,
+    ).id;
+
     const tenant = new Tenant();
     tenant.name = createTenantDto.name;
+    tenant.keycloakId = tenantKeycloakId;
     tenant.parent = parent;
     tenant.subdomain = this.generateSubdomain(
       createTenantDto.subdomain,

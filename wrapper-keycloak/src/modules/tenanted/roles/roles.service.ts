@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import KeycloakFacadeService from 'src/modules/auth/keycloak-facade/keycloak-facade.service';
-import { TenancyService } from 'src/modules/tenancy/tenancy.service';
+import KeycloakFacadeService from '../../auth/keycloak-facade/keycloak-facade.service';
+import { TenancyService } from '../../tenancy/tenancy.service';
 
 @Injectable()
 export class RolesService {

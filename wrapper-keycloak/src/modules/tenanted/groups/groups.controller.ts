@@ -11,8 +11,8 @@ import {
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { UpdateGroupDto } from './dto/update-group.dto';
-import { TenancyGuard } from 'src/modules/tenancy/tenancy.guard';
-import { IKeycloakRealmRoles } from 'src/modules/auth/keycloak-facade/keycloak-facade.service';
+import { TenancyGuard } from '../../tenancy/tenancy.guard';
+import { IKeycloakRealmRoles } from '../../auth/keycloak-facade/keycloak-facade.service';
 
 @Controller('groups')
 export class GroupsController {
