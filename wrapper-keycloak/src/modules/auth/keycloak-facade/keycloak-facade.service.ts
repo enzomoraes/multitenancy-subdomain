@@ -27,6 +27,28 @@ export default class KeycloakFacadeService {
     private http: HttpService,
   ) {}
 
+  public async login(
+    username: string,
+    password: string,
+    tenant: string,
+  ): Promise<IKeycloakTokens> {
+    return firstValueFrom(
+      this.http
+        .post(
+          `${this.configService.get(
+            'KEYCLOAK_HOST',
+          )}/realms/${tenant}/protocol/openid-connect/token`,
+          new URLSearchParams({
+            client_id: 'admin-cli',
+            grant_type: 'password',
+            username,
+            password,
+          }),
+        )
+        .pipe(map((response) => response.data)),
+    );
+  }
+
   /**
    * This method is responsible for creating a tenant in keycloak
    * @param tenant information

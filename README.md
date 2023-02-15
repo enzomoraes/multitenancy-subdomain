@@ -50,8 +50,8 @@ npm run typeorm:run-public-migration
 ### TODO
 
 endpoint to exchange user token (switching environments/tenants)
-ajustar migrations (sem profile agr)
 ver pq banco do keycloak está apagando qnd sobe de novo
+adicionar no readme como fazer client gerar token com roles
 
 
 ### Questions
