@@ -2,9 +2,9 @@ POST http://localhost:3000/login HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "admin",
-  "password": "admin", 
-  "tenant": "master"
+  "username": "enzo",
+  "password": "enzo", 
+  "tenant": "TESTE"
 }
 
 ####

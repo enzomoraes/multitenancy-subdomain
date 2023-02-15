@@ -81,6 +81,38 @@ export default class KeycloakFacadeService {
     );
   }
 
+  public async allowAllRealmRolesScope(tenant: string): Promise<void> {
+    const adminToken = await this.getAdminTokenMaster();
+    const accessToken = adminToken.access_token;
+    const authHeader = {
+      headers: {
+        Authorization: `bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+    };
+
+    const adminCliClient = await firstValueFrom(
+      this.http.get(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients?clientId=admin-cli&search=true`,
+        authHeader,
+      ),
+    );
+
+    const adminCliClientId = adminCliClient.data[0].id;
+    // http://localhost:28080/admin/realms/TENANT/clients/CLIENTID/scope-mappings/realm
+    await firstValueFrom(
+      this.http.post(
+        `${this.configService.get(
+          'KEYCLOAK_HOST',
+        )}/admin/realms/${tenant}/clients/${adminCliClientId}/scope-mappings/realm`,
+        await this.getRoles(tenant),
+        authHeader,
+      ),
+    );
+  }
+
   /**
    * This method creates openid scope for admin-cli so the admin-cli client can request userinfo to validate token
    * @param tenant tenant name
