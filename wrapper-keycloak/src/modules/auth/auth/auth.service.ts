@@ -12,11 +12,9 @@ export class AuthService {
     password: string,
     tenant: string,
   ): Promise<IKeycloakTokens> {
-    try {
-      return this.keycloakFacade.login(username, password, tenant);
-    } catch (e) {
+    return this.keycloakFacade.login(username, password, tenant).catch((e) => {
       console.log(e);
       throw { message: 'invalid credentials', statusCode: 401 };
-    }
+    });
   }
 }
