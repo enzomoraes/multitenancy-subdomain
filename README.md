@@ -46,10 +46,11 @@ npm run typeorm:run-public-migration
 
 ## Now you are ready to go
 
+npm run start:dev
 
 ### TODO
 
-ver pq banco do keycloak está apagando qnd sobe de novo
+Otimizar build e mudar para produção
 
 
 ### Questions

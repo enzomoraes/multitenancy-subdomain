@@ -23,6 +23,8 @@ services:
     ports:
       - '28080:8080'
     restart: unless-stopped
+    volumes:
+      - ./docker/volumes/keycloak:/opt/keycloak/data
 
   keycloak-pgsql:
     container_name: keycloak_pgsql
